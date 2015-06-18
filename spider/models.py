@@ -19,7 +19,9 @@ class News(models.Model):
     match_id = models.CharField(u'比赛id', max_length=20)
     end_score = models.CharField(u'完场比分', max_length=20)
     middle_score = models.CharField(u'中场比分', max_length=20)
-
+    yapanSB = models.CharField(u'亚盘SB',max_length=20,null=True,blank=True)
+    daxiaopanSB = models.CharField(u'大小盘SB',max_length=20,null=True,blank=True)
+    
     class Meta:
         verbose_name = u'比赛信息'
         verbose_name_plural = u'比赛信息'

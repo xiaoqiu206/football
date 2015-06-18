@@ -36,7 +36,8 @@ def spider():
         a4_trs = table.find_all('tr', class_='a4')
         a3_trs.extend(a4_trs)
         for tr in a3_trs:
-            if (not tr.has_attr('style')) and tr['id'].find('ad') == -1:  # 没有 style='display: none'
+            # 没有 style='display: none'
+            if (not tr.has_attr('style')) and tr['id'].find('ad') == -1:
                 time_td_text = tr.find_all('td')[3].get_text()  # 比赛时间所在的td
                 match_id = tr['id']
                 end_score = tr.find_all('td')[5].get_text()
@@ -70,6 +71,10 @@ def spider():
                     score = tds[5].get_text()
                     team2 = tds[6].find_all('font')[0].get_text()
                     halfscore = tds[7].get_text()
+
+                    yapanSB = re.sub(r'\s', '', tds[10].find_all('div')[0].text)
+                    daxiaopanSB = tds[10].find_all('div')[1].text
+
                     same_match_sep = datetime.datetime.now(
                     ) - datetime.timedelta(seconds=config.SAME_MATCH_SEP_TIME)
                     matchs = News.objects.filter(score=score).filter(team1=team1).filter(
@@ -86,7 +91,7 @@ def spider():
                                     pass
                             news = News.objects.create(
                                 match_type=ftype, game_start_time=gamestarttime, status=gamestatus, team1=team1, team2=team2, half_score=halfscore,
-                                score=score, yapan=yapan1 + '-' + yapan2, daxiaopan=daxiaopan1 + '-' + daxiaopan2, findex=each, match_id=match_id)
+                                score=score, yapan=yapan1 + '-' + yapan2, daxiaopan=daxiaopan1 + '-' + daxiaopan2, findex=each, match_id=match_id, yapanSB=yapanSB, daxiaopanSB=daxiaopanSB)
                             news.save()
                     for each in config.DAXIAOPAN:
                         if daxiaopan1 == each.split('-')[0] and daxiaopan2 == each.split('-')[1]:
@@ -99,7 +104,7 @@ def spider():
                                     pass
                             news = News.objects.create(
                                 match_type=ftype, game_start_time=gamestarttime, status=gamestatus, team1=team1, team2=team2, half_score=halfscore,
-                                score=score, yapan=yapan1 + '-' + yapan2, daxiaopan=daxiaopan1 + '-' + daxiaopan2, findex=each, match_id=match_id)
+                                score=score, yapan=yapan1 + '-' + yapan2, daxiaopan=daxiaopan1 + '-' + daxiaopan2, findex=each, match_id=match_id, yapanSB=yapanSB, daxiaopanSB=daxiaopanSB)
                             news.save()
         time.sleep(config.SPIDER_SEP_TIME)
 
