@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <title>比赛信息列表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            text-align: center;
+            align: center;
+            margin: 10px;
+            border: solid #add9c0;
+            border-width: 1px 0px 0px 1px;
+        }
+        td,
+        th {
+            border: solid #add9c0;
+            border-width: 0px 1px 1px 0px;
+            padding: 10px 10px;
+           /* background-color:aliceblue */
+        }
+    </style>
+    <script>
+        function deleteBeyondTen() { // 删除超过10条的tr
+            var trs = document.getElementsByClassName('tr10');
+            var len = trs.length;
+            if (len > 9) {
+                for (var n = len - 1; n >= 0; n--) {
+                    if (n > 9) {
+                        var btn = trs[n].getElementsByTagName('td')[11].getElementsByTagName('input')[0];
+                        btn.onclick();
+                    }
+                }
+            }
+        }
+
+        function deleteIf0() { // 如果是0-0就移到下面
+            var trs = document.getElementsByClassName('tr10');
+            var len = trs.length;
+            for (var n = len - 1; n >= 0; n--) {
+                var half_score = trs[n].children[7].innerHTML;
+                var score = trs[n].children[5].innerHTML;
+                if (half_score == '0-0' || score == '0-0') {
+                    moveDown(trs[n].children[11].getElementsByTagName('input')[0]);
+                }
+            }
+        }
+
+        function deleteOrMove(obj) {
+            var tr = obj.parentNode.parentNode;
+            if (tr.className == 'tr10') {
+                moveDown(obj);
+            } else {
+                deleteOneMatch(obj);
+            }
+        }
+
+        function handle(data) { // 渲染json数据
+            data = JSON.parse(data);
+            // console.log(data[0])
+            // console.log(data.length)
+            var len = data.length;
+            var tbody = document.getElementById('main_table');
+            tdstr = '</td><td>';
+            for (var n = 0; n < len; n++) {
+                var tr = document.createElement('tr');
+                tr.className = 'tr10';
+                tr.innerHTML = ['<td>', data[n]['fields']['create_time'], tdstr, data[n]['fields']['match_type'], tdstr, data[n]['fields']['game_start_time'], tdstr, data[n]['fields']['status'], tdstr, data[n]['fields']['team1'], tdstr, data[n]['fields']['score'], tdstr, data[n]['fields']['team2'], tdstr, data[n]['fields']['half_score'], tdstr, data[n]['fields']['yapan'], tdstr, data[n]['fields']['daxiaopan'], tdstr, data[n]['fields']['findex'], tdstr, "<input type='button' value='删除' onclick='deleteOrMove(this);'/></td>"].join('');
+                tbody.insertBefore(tr, tbody.getElementsByTagName('tr')[1]);
+            }
+            deleteIf0();
+        }
+        function color3line(){  // 前3行着色
+            trs = document.getElementsByClassName('tr10');
+            for(var n=0;n<trs.length;n++){
+                if(n<3){
+                    trs[n].style.backgroundColor = '#EDF3FE';
+                }else{
+                    trs[n].style.backgroundColor = 'white';
+                }
+            }
+        }
+        function get_ajax() { // 发送ajax请求
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    var data = xmlhttp.responseText;
+                    // console.log(data);
+                    handle(data);
+                    // deleteIf0();
+                    deleteBeyondTen();
+                    color3line();
+                }
+            }
+            xmlhttp.open('GET', '/news/get_ajax', true);
+            xmlhttp.send();
+        }
+
+        function inter() {
+            window.setInterval(get_ajax, 10000);
+        }
+
+        function deleteOneMatch(obj) { // 删除所有该场赛事的这个时间点的信息
+            obj.parentNode.parentNode.parentNode.removeChild(obj.parentNode.parentNode);
+        }
+
+        function deleteAllMatch(obj) { // 删除所有这场赛事
+            var timer = null;
+            var tr = obj.parentNode.parentNode;
+            timer = setInterval(function() {
+                var sibling = tr.nextElementSibling;
+                if (sibling == null) {
+                    tr.parentNode.removeChild(tr);
+                    clearInterval(timer);
+                }
+                if (sibling.children.length != 2) {
+                    sibling.parentNode.removeChild(sibling);
+                } else {
+                    tr.parentNode.removeChild(tr);
+                    clearInterval(timer);
+                }
+
+            }, 10);
+        }
+
+        function moveDown(obj) { // 将上面10场比赛中的一场移动下去
+            var tr = obj.parentNode.parentNode; // 比赛所在的tr
+            var teams = tr.children[4].innerHTML + '-' + tr.children[6].innerHTML; // 2个team
+            var tbody = document.getElementById('main_table');
+            var trs = tbody.getElementsByTagName('tr');
+            var len = trs.length;
+            var newNode = tr.cloneNode(true); // 克隆一个新元素
+            newNode.className = 'not10';
+            for (var n = 0; n < len; n++) {
+                if (trs[n].children[0].innerHTML == teams) { // 如果下面已经有这场比赛了
+                    tbody.insertBefore(newNode, trs[n].nextElementSibling); // 在比赛头tr后面添加
+                    tbody.removeChild(tr); // 删除10条中的那个元素
+                    return;
+                }
+            }
+            // 如果下面没有这场比赛,就要新建一个比赛头
+            var newMatchHead = document.createElement('tr');
+            newMatchHead.innerHTML = "<td colspan='6'>" + teams + "</td><td colspan='6'><input type='button' value='删除' onclick='deleteAllMatch(this);' /></td>";
+            tbody.appendChild(newMatchHead);
+            tbody.appendChild(newNode);
+            tbody.removeChild(tr);
+            // console.log(teams);
+        }
+    </script>
+</head>
+
+<body onload='inter();'>
+    <center>
+        <table border='1' cellpadding='0' cellspacing='0' style='text-align:center;align:center'>
+            <tbody id='main_table'>
+                <tr id='tr_h'>
+                    <th>获取时间</th>
+                    <th>赛事</th>
+                    <th>比赛开始时间</th>
+                    <th>状态</th>
+                    <th>主场球队</th>
+                    <th>比分</th>
+                    <th>客场球队</th>
+                    <th>半场</th>
+                    <th>亚盘</th>
+                    <th>大小盘</th>
+                    <th>预设指数</th>
+                    <th>操作</th>
+                </tr>
+            </tbody>
+        </table>
+    </center>
+</body>
+
+</html>
