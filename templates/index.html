@@ -21,7 +21,7 @@
             border: solid #add9c0;
             border-width: 0px 1px 1px 0px;
             padding: 10px 10px;
-           /* background-color:aliceblue */
+            /* background-color:aliceblue */
         }
     </style>
     <script>
@@ -45,7 +45,7 @@
                 var half_score = trs[n].children[7].innerHTML;
                 var score = trs[n].children[5].innerHTML;
                 if (half_score == '0-0' || score == '0-0') {
-                    moveDown(trs[n].children[11].getElementsByTagName('input')[0]);
+                    moveDown(trs[n].children[13].getElementsByTagName('input')[0]);
                 }
             }
         }
@@ -69,21 +69,23 @@
             for (var n = 0; n < len; n++) {
                 var tr = document.createElement('tr');
                 tr.className = 'tr10';
-                tr.innerHTML = ['<td>', data[n]['fields']['create_time'], tdstr, data[n]['fields']['match_type'], tdstr, data[n]['fields']['game_start_time'], tdstr, data[n]['fields']['status'], tdstr, data[n]['fields']['team1'], tdstr, data[n]['fields']['score'], tdstr, data[n]['fields']['team2'], tdstr, data[n]['fields']['half_score'], tdstr, data[n]['fields']['yapan'], tdstr, data[n]['fields']['daxiaopan'], tdstr, data[n]['fields']['findex'], tdstr, "<input type='button' value='删除' onclick='deleteOrMove(this);'/></td>"].join('');
+                tr.innerHTML = ['<td>', data[n]['fields']['create_time'], tdstr, data[n]['fields']['match_type'], tdstr, data[n]['fields']['game_start_time'], tdstr, data[n]['fields']['status'], tdstr, data[n]['fields']['team1'], tdstr, data[n]['fields']['score'], tdstr, data[n]['fields']['team2'], tdstr, data[n]['fields']['half_score'], tdstr, data[n]['fields']['yapan'], tdstr, data[n]['fields']['yapanSB'], tdstr, data[n]['fields']['daxiaopan'], tdstr, data[n]['fields']['daxiaopanSB'], tdstr, data[n]['fields']['findex'], tdstr, "<input type='button' value='删除' onclick='deleteOrMove(this);'/></td>"].join('');
                 tbody.insertBefore(tr, tbody.getElementsByTagName('tr')[1]);
             }
             deleteIf0();
         }
-        function color3line(){  // 前3行着色
+
+        function color3line() { // 前3行着色
             trs = document.getElementsByClassName('tr10');
-            for(var n=0;n<trs.length;n++){
-                if(n<3){
+            for (var n = 0; n < trs.length; n++) {
+                if (n < 3) {
                     trs[n].style.backgroundColor = '#EDF3FE';
-                }else{
+                } else {
                     trs[n].style.backgroundColor = 'white';
                 }
             }
         }
+
         function get_ajax() { // 发送ajax请求
             var xmlhttp = new XMLHttpRequest();
             xmlhttp.onreadystatechange = function() {
@@ -127,8 +129,8 @@
             }, 10);
         }
 
-        function moveDown(obj) { // 将上面10场比赛中的一场移动下去
-            var tr = obj.parentNode.parentNode; // 比赛所在的tr
+        function moveDown(o) { // 将上面10场比赛中的一场移动下去
+            var tr = o.parentNode.parentNode; // 比赛所在的tr
             var teams = tr.children[4].innerHTML + '-' + tr.children[6].innerHTML; // 2个team
             var tbody = document.getElementById('main_table');
             var trs = tbody.getElementsByTagName('tr');
@@ -144,7 +146,7 @@
             }
             // 如果下面没有这场比赛,就要新建一个比赛头
             var newMatchHead = document.createElement('tr');
-            newMatchHead.innerHTML = "<td colspan='6'>" + teams + "</td><td colspan='6'><input type='button' value='删除' onclick='deleteAllMatch(this);' /></td>";
+            newMatchHead.innerHTML = "<td colspan='8'>" + teams + "</td><td colspan='6'><input type='button' value='删除' onclick='deleteAllMatch(this);' /></td>";
             tbody.appendChild(newMatchHead);
             tbody.appendChild(newNode);
             tbody.removeChild(tr);
@@ -167,7 +169,9 @@
                     <th>客场球队</th>
                     <th>半场</th>
                     <th>亚盘</th>
+                    <th>亚盘SB</th>
                     <th>大小盘</th>
+                    <th>大小盘SB</th>
                     <th>预设指数</th>
                     <th>操作</th>
                 </tr>
